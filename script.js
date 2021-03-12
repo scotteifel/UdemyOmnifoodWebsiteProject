@@ -65,8 +65,10 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
-const editWorkoutButton = document.querySelector('.workout__edit');
+
+const editDistance = document.querySelector('.workout__edit--distance');
 const deleteWorkoutButton = document.querySelector('.workout__delete');
+
 
 class App {
   #workouts = [];
@@ -86,7 +88,6 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
-
     containerWorkouts.addEventListener('click', this._editField.bind(this));
   };
 
@@ -116,7 +117,6 @@ class App {
     this.#workouts.forEach(work => {
       this._renderWorkoutMarker(work)
     });
-
   };
 
   _showForm(mapE) {
@@ -231,18 +231,19 @@ class App {
       <li class="workout workout--${workout.type}" data-id='${workout.id}'>
         <h2 class="workout__title">${workout.description}
         <button type="button" class ="workout__delete">🗑️</button>
-        <!-- <button type="button" class ="workout__edit">...</button> -->
         </h2>
         <div class="workout__details">
           <span class="workout__icon">${workout.type==='running'?'🏃‍':'🚴'}
             </span>
-          <span class="workout__value  workout__value--edit">
+          <span class="workout__value  workout__value--distance
+            workout__value--edit">
             ${workout.distance}</span>
           <span class="workout__unit">km</span>
         </div>
         <div class="workout__details">
           <span class="workout__icon">⏱</span>
-          <span class="workout__value  workout__value--edit">
+          <span class="workout__value  workout__value--time
+            workout__value--edit">
             ${workout.duration}</span>
           <span class="workout__unit">min</span>
         </div>
@@ -285,45 +286,6 @@ class App {
         this._deleteWorkout.bind(this));
   };
 
-  // _editWorkout(e) {
-  //   // const workoutEl = e.target.closest('.workout--running') || e.target
-  //   //     .closest('.workout--cycling')
-  //   const id = e.target.closest('.workout');
-  //   // const id = e.target.closest('.workout').getAttribute('data-id');
-  //   let pos;
-  //   console.log(id);
-  //   this.#workouts.forEach(function(workout, i) {
-  //     if(workout.id === id) {
-  //       pos = i;
-  //     };
-  //   });
-
-
-    // let workoutObj = this.#workouts[pos]
-    // console.log(this.#workouts[pos]);
-    //
-    // this._showForm(this.mapE)
-    // // Fill the form with the workouts data
-    // inputDistance.value = workoutObj.distance
-    // inputDuration.value = workoutObj.duration
-    //
-    // if (workoutObj.type === 'running') {
-    //   inputCadence.value = workoutObj.cadence;
-    //   if (inputType.value !== 'running') this._toggleElevationField()
-    // } else {
-    //   inputElevation.value = workoutObj.elevation;
-    //   if (inputType.value !== 'cycling') this._toggleElevationField()
-    // };
-
-    // Update the workout
-
-
-
-    // Remove the workout from the finished workouts area
-    // this._deleteWorkout(e)
-    // Adjust any relevant arrays.
-  // }
-
   _deleteWorkout(e) {
     e.stopPropagation()
 
@@ -345,17 +307,59 @@ class App {
     // Remove the workout from the workouts array,local storage and DOM
     workoutEl.remove();
     this.#workouts.splice(pos, 1);
-    localStorage.removeItem('workouts');
-
-    // Refresh the local storage
-    this._setLocalStorage();
+    this._refreshLocalStorage()
   };
 
   _editField(e) {
+    if (e.target.classList.contains('form__edit')) return;
+
     const field = e.target.closest('.workout__value--edit');
     if (!field) return;
 
-    console.log(field, ' clicked');
+    const html = `<input maxlength=3 width=100% type=number
+      class="form__edit form__edit--${field.classList.contains('workout__value--time') ? 'time' : 'distance'}">
+    `
+
+    field.insertAdjacentHTML('afterbegin', html);
+    const formEditEl = field.querySelector('.form__edit');
+
+    formEditEl.focus();
+    formEditEl.addEventListener('change', this._completeEdit.bind(this));
+    formEditEl.addEventListener('blur', this._cancelEdit.bind(this));
+  };
+
+  _completeEdit(e) {
+    e.stopPropagation()
+
+    console.log(e.target.classList.contains('form__edit--time'));
+    const newVal = e.target.value;
+    const workoutEl = document.querySelector('.form__edit')
+                      .closest('.workout');
+    const workoutId = workoutEl.getAttribute('data-id');
+    if (!workoutId) return;
+    console.log(workoutEl);
+
+    if (e.target.classList.contains('form__edit--time')) {
+      console.log('time');
+      this.#workouts.find(work => work.id === workoutId).duration = +newVal;
+      workoutEl.querySelector('.workout__value--time').textContent = newVal;
+
+    } else {
+      console.log('distance');
+      this.#workouts.find(work => work.id === workoutId)
+        .distance = +newVal;
+      workoutEl.querySelector('.workout__value--distance')
+        .textContent = newVal;
+    };
+
+    if (document.querySelector('.form__edit'))
+      document.querySelector('.form__edit').remove();
+    this._refreshLocalStorage();
+  };
+
+  _cancelEdit(e) {
+    // Js uses blur twice because it is set in an EH, if statement catches it
+    if (e.relatedTarget) document.querySelector('.form__edit').remove();
   };
 
   _moveToPopup(e) {
@@ -387,6 +391,12 @@ class App {
     this.#workouts = data;
     this._drawAllWorkouts()
   };
+
+  _refreshLocalStorage() {
+    console.log('refreshed');
+    localStorage.removeItem('workouts');
+    this._setLocalStorage();
+  }
 
   _drawAllWorkouts() {
     this.#workouts.forEach(work => {
