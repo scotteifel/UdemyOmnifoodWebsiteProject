@@ -76,6 +76,7 @@ class App {
   #mapEvent;
   #mapZoomLevel = 13;
   #popups = []
+  #workoutNameInc = 0
 
   constructor() {
     // Get the users position
@@ -188,6 +189,7 @@ class App {
         );
 
       workout = new Cycling([lat, lng], distance, duration, elevation);
+
     };
 
     // Add new object to workout array
@@ -253,12 +255,15 @@ class App {
           html += `
             <div class="workout__details">
               <span class="workout__icon">⚡️</span>
-              <span class="workout__value">${workout.pace.toFixed(1)}</span>
+              <span class="workout__value workout__value--pace">
+                ${workout.pace.toFixed(1)}
+                </span>
               <span class="workout__unit">min/km</span>
             </div>
             <div class="workout__details">
               <span class="workout__icon">🦶🏼</span>
-              <span class="workout__value">${workout.cadence}</span>
+              <span class="workout__value workout__value--edit
+                workout__value--cadence">${workout.cadence}</span>
               <span class="workout__unit">spm</span>
             </div>
           </li>
@@ -268,20 +273,20 @@ class App {
             html += `
             <div class="workout__details">
               <span class="workout__icon">⚡️</span>
-              <span class="workout__value">${workout.speed.toFixed(1)}</span>
+              <span class="workout__value workout__value--pace">
+                ${workout.speed.toFixed(1)}</span>
               <span class="workout__unit">km/h</span>
             </div>
             <div class="workout__details">
               <span class="workout__icon">⛰</span>
-              <span class="workout__value">${workout.elevation}</span>
+              <span class="workout__value workout__value--edit
+                workout__value--elevation">${workout.elevation}</span>
               <span class="workout__unit">m</span>
             </div>
           </li>
             `;
 
       form.insertAdjacentHTML('afterend', html);
-      console.log(workout);
-
       document.querySelector('.workout__delete').addEventListener('click',
         this._deleteWorkout.bind(this));
   };
@@ -316,50 +321,99 @@ class App {
     const field = e.target.closest('.workout__value--edit');
     if (!field) return;
 
-    const html = `<input maxlength=3 width=100% type=number
-      class="form__edit form__edit--${field.classList.contains('workout__value--time') ? 'time' : 'distance'}">
-    `
+    //Properly labels html class
+    const checkField = function() {
+      if (field.classList.contains('workout__value--time')) {
+        return 'time';
+      } else if (field.classList.contains('workout__value--distance')) {
+        return 'distance';
+      } else if (field.classList.contains('workout__value--cadence')) {
+        return 'cadence';
+      } else {
+        return 'elevation';
+      };
+    };
+
+    const html = `
+      <input type=text maxlength=4
+      class="form__edit form__edit--${checkField()}">
+      `
 
     field.insertAdjacentHTML('afterbegin', html);
     const formEditEl = field.querySelector('.form__edit');
-
     formEditEl.focus();
     formEditEl.addEventListener('change', this._completeEdit.bind(this));
     formEditEl.addEventListener('blur', this._cancelEdit.bind(this));
   };
 
   _completeEdit(e) {
-    e.stopPropagation()
-
-    console.log(e.target.classList.contains('form__edit--time'));
     const newVal = e.target.value;
+    const targetClasses = e.target.classList
     const workoutEl = document.querySelector('.form__edit')
-                      .closest('.workout');
+    .closest('.workout');
     const workoutId = workoutEl.getAttribute('data-id');
-    if (!workoutId) return;
-    console.log(workoutEl);
 
-    if (e.target.classList.contains('form__edit--time')) {
-      console.log('time');
-      this.#workouts.find(work => work.id === workoutId).duration = +newVal;
-      workoutEl.querySelector('.workout__value--time').textContent = newVal;
-
-    } else {
-      console.log('distance');
-      this.#workouts.find(work => work.id === workoutId)
-        .distance = +newVal;
-      workoutEl.querySelector('.workout__value--distance')
-        .textContent = newVal;
+    const calcWorkoutPace = function(work) {
+      work.pace = work.duration / work.distance;
+      workoutEl.querySelector('.workout__value--pace').textContent =
+        work.pace.toFixed(1);
     };
 
-    if (document.querySelector('.form__edit'))
-      document.querySelector('.form__edit').remove();
-    this._refreshLocalStorage();
-  };
+    const calcWorkoutSpeed = function(work) {
+      work.speed = work.distance / (work.duration / 60);
+      workoutEl.querySelector('.workout__value').textContent =
+        work.speed.toFixed(1);
+    };
+
+    const updateDistance = function(work) {
+      workout.distance = +newVal;
+      workoutEl.querySelector('.workout__value--distance').textContent =
+      workout.distance;
+    }
+    const updateTime = function(work) {
+      workout.duration = +newVal
+      workoutEl.querySelector('.workout__value--time').textContent = newVal;
+    }
+
+    if (!workoutId) return;
+    const workout = this.#workouts.find(work => work.id === workoutId);
+
+    // Update a running workout
+    if (workout.type === 'running') {
+      if (targetClasses.contains('form__edit--distance')) {
+        updateDistance(workout);
+      } else if (targetClasses.contains('form__edit--time')) {
+        updateTime(workout);
+      } else {
+        workout.cadence = +newVal;
+        workoutEl.querySelector('.workout__value--cadence').textContent =
+        workout.cadence;
+      };
+      calcWorkoutPace(workout);
+      this._refreshLocalStorage();
+      // Update a cycling workout
+      } else {
+        if (targetClasses.contains('form__edit--distance')) {
+          updateDistance(workout)
+        } else if (targetClasses.contains('form__edit--time')){
+          updateTime(workout)
+        } else {
+          workout.elevation = +newVal;
+          workoutEl.querySelector('.workout__value--elevation').textContent =
+          workout.elevation;
+        };
+      calcWorkoutSpeed(workout);
+      this._refreshLocalStorage();
+      };
+    };
+
 
   _cancelEdit(e) {
     // Js uses blur twice because it is set in an EH, if statement catches it
-    if (e.relatedTarget) document.querySelector('.form__edit').remove();
+    if (e.relatedTarget || e.target.classList.contains('form__edit')) {
+      document.querySelector('.form__edit').remove();
+      return
+    };
   };
 
   _moveToPopup(e) {

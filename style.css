@@ -140,8 +140,9 @@ a:visited {
   opacity: 0;
 }
 
-.form__edit--time, .form__edit--distance {
-  width: 3rem;
+.form__edit--time, .form__edit--distance,
+.form__edit--cadence, .form__edit--elevation{
+  width: 4rem;
 }
 
 .form__row {
@@ -179,6 +180,7 @@ a:visited {
   display: none;
 }
 
+/* Remove the up/down arrows from the edit box
 /* Chrome, Safari, Edge, Opera */
 .form__edit::-webkit-outer-spin-button,
 .form__edit::-webkit-inner-spin-button {
