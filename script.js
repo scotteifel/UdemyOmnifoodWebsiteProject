@@ -69,7 +69,6 @@ const inputElevation = document.querySelector('.form__input--elevation');
 const editDistance = document.querySelector('.workout__edit--distance');
 const deleteWorkoutButton = document.querySelector('.workout__delete');
 
-
 class App {
   #workouts = [];
   #map;
@@ -226,6 +225,23 @@ class App {
 
   };
 
+  _renderDeleteAllOption() {
+
+    if(document.querySelector('.workout__delete--all')) return;
+    if(document.querySelectorAll('.workout').length < 1) return;
+    console.log(form);
+    const html = `
+      <div class="workout__delete--all">
+        <button type="button" class="btn__delete--all">
+        Clear Workouts
+        </button>
+      </div>
+      `
+    containerWorkouts.insertAdjacentHTML('beforeend', html);
+    document.querySelector('.btn__delete--all').addEventListener(
+      'click', this._deleteAllWorkouts.bind(this));
+  };
+
   // Render workout on map as marker
   _renderWorkout(workout) {
 
@@ -286,9 +302,8 @@ class App {
           </li>
             `;
 
+      this._renderDeleteAllOption()
       form.insertAdjacentHTML('afterend', html);
-      document.querySelector('.workout__delete').addEventListener('click',
-        this._deleteWorkout.bind(this));
   };
 
   _deleteWorkout(e) {
@@ -313,6 +328,19 @@ class App {
     workoutEl.remove();
     this.#workouts.splice(pos, 1);
     this._refreshLocalStorage()
+  };
+
+  _deleteAllWorkouts(e) {
+    document.querySelectorAll('.workout').forEach((work, i) => {
+      work.remove()
+      this.#map.removeLayer(this.#popups[i]);
+    });
+
+    this.#popups = []
+    this.#workouts = []
+    this._refreshLocalStorage()
+    document.querySelector('.workout__delete--all').remove()
+
   };
 
   _editField(e) {
@@ -342,6 +370,7 @@ class App {
     field.insertAdjacentHTML('afterbegin', html);
     const formEditEl = field.querySelector('.form__edit');
     formEditEl.focus();
+
     formEditEl.addEventListener('change', this._completeEdit.bind(this));
     formEditEl.addEventListener('blur', this._cancelEdit.bind(this));
   };
@@ -447,7 +476,6 @@ class App {
   };
 
   _refreshLocalStorage() {
-    console.log('refreshed');
     localStorage.removeItem('workouts');
     this._setLocalStorage();
   }

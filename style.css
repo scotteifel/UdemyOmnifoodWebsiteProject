@@ -140,8 +140,7 @@ a:visited {
   opacity: 0;
 }
 
-.form__edit--time, .form__edit--distance,
-.form__edit--cadence, .form__edit--elevation{
+.form__edit {
   width: 4rem;
 }
 
@@ -191,6 +190,26 @@ a:visited {
 /* Firefox */
 .form__edit[type=number] {
   -moz-appearance: textfield;
+}
+
+.workout__delete--all {
+text-align: right;
+margin: 1rem;
+}
+
+.btn__delete--all {
+  border-style: solid;
+  padding: 3px;
+  background-color: var(--color-light--1);
+  text: bold;
+  font-size: 14px;
+  font-family: Open Sans, sans-serif;
+
+}
+
+.btn__delete--all:hover {
+  background-color: #62646b;
+  border-style: inset;
 }
 
 .copyright {
