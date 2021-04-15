@@ -24,7 +24,6 @@ html {
 /* REUSABLE COMPONENTS */
 /* ---------------------------------------------- */
 
-
 .row {
     max-width: 1140px;
     margin: 0 auto;
@@ -43,7 +42,8 @@ section {
     line-height: 145%;
 }
 
-/* --------HEADINGS--------- */
+/* -------------HEADINGS------------ */
+
 h1,
 h2,
 h3 {
@@ -81,24 +81,24 @@ h2:after {
     width: 100px;
     margin: 0 auto;
     margin-top: 30px;
-
 }
 
 /* ---------PARAGRAPHS--------- */
+
 .long-copy {
     line-height: 145%;
     width: 70%;
     margin-left: 15%;
 }
 
-/* --------ICONS--------- */
+/* -----------ICONS------------- */
+
 .icon-big {
     font-size: 350%;
     display: block;
     color:#e67e22;
     margin-bottom: 10px;
 }
-
 
 /* ---------BUTTONS--------- */
 
@@ -110,8 +110,7 @@ h2:after {
     text-decoration: none;
     border-radius: 200px;
     border: 1px solid #e67e22;
-    transition: background-color 0.2s; border 0.2s, color 0.2s;
-
+    transition: background-color 0.2s, border 0.2s, color 0.2s;
 }
 
 .btn-full:link,
@@ -119,7 +118,6 @@ h2:after {
     background-color: #e67e22;
     color:#fff;
     margin-right: 15px;
-
 }
 
 .btn-ghost:link,
@@ -135,7 +133,6 @@ h2:after {
 .btn-full:hover,
 .btn-full:active {
     color:#fff;
-
 }
 
 .btn-ghost:hover,
@@ -200,7 +197,55 @@ header {
     border-bottom: 2px solid #cf6d17;
 }
 
+/* ----------------------------- */
+/* FEATURES */
+/* ----------------------------- */
+
 .section-features {
     text-align: center;
     color: #000;
+}
+
+.section-features .long-copy {
+    margin-bottom: 30px;
+}
+
+
+/* ----------------------------- */
+/* MEALS */
+/* ----------------------------- */
+
+.section-meals {
+    padding: 0;
+}
+
+.meals-showcase {
+    list-style: none;
+    width: 100%;
+}
+
+.meals-showcase li{
+    display: block;
+    float: left;
+    width: 25%;
+}
+
+.meal-photo {
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+}
+
+.meal-photo img {
+    opacity: 0.7;
+    width: 100%;
+    height: auto;
+    transform: scale(1.15);
+    transition: transform 0.5s, opacity 0.5s;
+}
+
+.meal-photo img:hover {
+    transform: scale(1.03);
+    opacity: 1;
 }
