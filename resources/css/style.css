@@ -175,10 +175,11 @@ h2:after {
 /* ---------------------------------------------- */
 
 header {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.705), rgba(0, 0, 0, 0.705)), url("/resources/img/hero.jpg");
+    background-image: linear-gradient(rgba(0, 0, 0, 0.705), rgba(0, 0, 0, 0.705)), url("/resources/css/img/hero.jpg");
     background-size: cover;
     background-position: center;
     height: 100vh;
+    background-attachment: fixed;
 }
 
 .hero-text-box {
@@ -364,43 +365,48 @@ header {
     margin-top: -5px;
 }
 
+/* ---------------------------------------------- */
+/* TESTIMONIALS */
+/* ---------------------------------------------- */
 
-/* -------------------------
-/* CITIES */
-/* ------------------------- */
-/* 
-.section-cities {
-    padding: 0;
+.section-testimonials {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.801), rgba(0, 0, 0, 0.801)), url("/resources/css/img/back-customers.jpg");
+    background-size: cover;
+    color: white;
+    background-attachment: fixed;
 }
 
-.section-cities h2 {
-    margin-top: 70px;
-}
-
-.section-cities p {
-    text-align: center;
-}
-
-.cities-showcase {
-    list-style: none;
-    margin: auto;
-    width: 100%;
-}
-
-.section-cities li{
-    display: inline-flex;
+.testimonial {
+    display: inline-block;
     float: left;
-    text-align: center;
 }
 
-.cities-photo img {
-    height: 200px;
-    width: auto;
-    padding: 15px;
-}
-
-.cities-showcase figcaption {
-    margin-top: 10px;
+blockquote {
+    padding: 2%;
+    font-style: italic;
     line-height: 145%;
-    color: #131313;
-} */ */
+    position: relative;
+    margin-top: 40px;
+}
+
+blockquote:before {
+    content: "\201C";
+    font-size: 500%;
+    display: block;
+    position: absolute;
+    top: -5px;
+    left: -5px;
+}
+
+cite {
+    font-size: 90%;
+    margin-top: 25px;
+    display: block;
+}
+
+cite img{
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+}
