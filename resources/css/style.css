@@ -175,9 +175,9 @@ input[type=submit]:active { background-color: #cf6d17 }
 /* ---------------------------------------------- */
 
 header {
-    background-image: -o-linear-gradient(rgba(0, 0, 0, 0.705), rgba(0, 0, 0, 0.705)), url("/resources/css/img/hero.jpg");
-    background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.705)), to(rgba(0, 0, 0, 0.705))), url("/resources/css/img/hero.jpg");
-    background-image: linear-gradient(rgba(0, 0, 0, 0.705), rgba(0, 0, 0, 0.705)), url("/resources/css/img/hero.jpg");
+    background-image: -o-linear-gradient(rgba(0, 0, 0, 0.705), rgba(0, 0, 0, 0.705)), url("/resources/css/img/hero-min.jpg");
+    background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.705)), to(rgba(0, 0, 0, 0.705))), url("/resources/css/img/hero-min.jpg");
+    background-image: linear-gradient(rgba(0, 0, 0, 0.705), rgba(0, 0, 0, 0.705)), url("/resources/css/img/hero-min.jpg");
     background-size: cover;
     background-position: center;
     height: 100vh;
@@ -414,9 +414,9 @@ header {
 /* ---------------------------------------------- */
 
 .section-testimonials {
-    background-image: -o-linear-gradient(rgba(0, 0, 0, 0.801), rgba(0, 0, 0, 0.801)), url("/resources/css/img/back-customers.jpg");
-    background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.801)), to(rgba(0, 0, 0, 0.801))), url("/resources/css/img/back-customers.jpg");
-    background-image: linear-gradient(rgba(0, 0, 0, 0.801), rgba(0, 0, 0, 0.801)), url("/resources/css/img/back-customers.jpg");
+    background-image: -o-linear-gradient(rgba(0, 0, 0, 0.801), rgba(0, 0, 0, 0.801)), url("/resources/css/img/back-customers-min.jpg");
+    background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.801)), to(rgba(0, 0, 0, 0.801))), url("/resources/css/img/back-customers-min.jpg");
+    background-image: linear-gradient(rgba(0, 0, 0, 0.801), rgba(0, 0, 0, 0.801)), url("/resources/css/img/back-customers-min.jpg");
     background-size: cover;
     color: white;
     background-attachment: fixed;
