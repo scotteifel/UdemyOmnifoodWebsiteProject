@@ -117,6 +117,10 @@ a:visited {
   font-weight: 800;
 }
 
+.workout__value--edit {
+  cursor: auto; 
+}
+
 .form {
   background-color: var(--color-dark--2);
   border-radius: 5px;
@@ -138,10 +142,6 @@ a:visited {
   padding: 0 2.25rem;
   margin-bottom: 0;
   opacity: 0;
-}
-
-.form__edit {
-  width: 4rem;
 }
 
 .form__row {
@@ -192,6 +192,10 @@ a:visited {
   -moz-appearance: textfield;
 }
 
+.form__edit {
+  width: 4rem;
+}
+
 .workout__delete--all {
 text-align: right;
 margin: 1rem;
@@ -202,8 +206,11 @@ margin: 1rem;
   padding: 3px;
   background-color: var(--color-light--1);
   text: bold;
-  font-size: 14px;
+  font-size: 12px;
   font-family: Open Sans, sans-serif;
+  border-radius: 5px;
+  background-color: #bbbfce;
+
 
 }
 

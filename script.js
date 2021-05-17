@@ -13,12 +13,11 @@ class Workout {
 
   _setDescription() {
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
-     'July', 'August', 'September', 'October', 'November', 'December'];
+      'July', 'August', 'September', 'October', 'November', 'December'];
 
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)}
- on ${months[this.date.getMonth()]} ${this.date.getDate()}`;
+      on ${months[this.date.getMonth()]} ${this.date.getDate()}`;
   };
-
 };
 
 class Running extends Workout {
@@ -55,27 +54,27 @@ class Cycling extends Workout {
   };
 };
 
-///////////////////////////////////////////
-// APPLICATION ARCHITECURE
+/////////////////////////////
+// APPLICATION ARCHITECURE //
+/////////////////////////////
 
-const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
-const inputType = document.querySelector('.form__input--type');
+const deleteWorkoutButton = document.querySelector('.workout__delete');
+const editDistance = document.querySelector('.workout__edit--distance');
+const form = document.querySelector('.form');
+const inputCadence = document.querySelector('.form__input--cadence');
 const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
-const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
-
-const editDistance = document.querySelector('.workout__edit--distance');
-const deleteWorkoutButton = document.querySelector('.workout__delete');
+const inputType = document.querySelector('.form__input--type');
 
 class App {
   #workouts = [];
   #map;
   #mapEvent;
   #mapZoomLevel = 13;
-  #popups = []
-  #workoutNameInc = 0
+  #popups = [];
+  #workoutNameInc = 0;
 
   constructor() {
     // Get the users position
@@ -157,10 +156,10 @@ class App {
     const type = inputType.value;
     const distance = +inputDistance.value;
     const duration = +inputDuration.value;
-    const {lat, lng} = this.#mapEvent.latlng;
+    const { lat, lng } = this.#mapEvent.latlng;
     let workout;
 
-    // If the workout is running, create a running object
+    // Create a running object
     if(type === 'running') {
       const cadence = +inputCadence.value;
 
@@ -169,12 +168,13 @@ class App {
         !validInputs(distance, duration, cadence) ||
         !allPositive(distance, duration, cadence)
       )
-        return alert('Inputs have to be positive numbers.');
+        return alert('Inputs have to be positive numbers.'
+        );
 
       workout = new Running([lat, lng], distance, duration, cadence);
     };
 
-    // If the workout is cycling, create a cycling object
+    // Create a cycling object
     if(type === 'cycling') {
       const elevation = +inputElevation.value;
 
@@ -188,7 +188,6 @@ class App {
         );
 
       workout = new Cycling([lat, lng], distance, duration, elevation);
-
     };
 
     // Add new object to workout array
@@ -222,7 +221,6 @@ class App {
       )
       .openPopup();
     this.#popups.push(marker)
-
   };
 
   _renderDeleteAllOption() {
@@ -233,10 +231,10 @@ class App {
     const html = `
       <div class="workout__delete--all">
         <button type="button" class="btn__delete--all">
-        Clear Workouts
+        <span class="tooltip" title="Delete all workouts?">Remove all</span>
         </button>
       </div>
-      `
+    `
     containerWorkouts.insertAdjacentHTML('beforeend', html);
     document.querySelector('.btn__delete--all').addEventListener(
       'click', this._deleteAllWorkouts.bind(this));
@@ -248,24 +246,24 @@ class App {
     let html = `
       <li class="workout workout--${workout.type}" data-id='${workout.id}'>
         <h2 class="workout__title">${workout.description}
-        <button type="button" class ="workout__delete">🗑️</button>
+        <button type="button" class ="workout__delete tooltip" title="Delete workout">🗑️</button>
         </h2>
         <div class="workout__details">
           <span class="workout__icon">${workout.type==='running'?'🏃‍':'🚴'}
             </span>
           <span class="workout__value  workout__value--distance
-            workout__value--edit">
+            workout__value--edit tooltip" title="Edit field">
             ${workout.distance}</span>
           <span class="workout__unit">km</span>
         </div>
         <div class="workout__details">
           <span class="workout__icon">⏱</span>
           <span class="workout__value  workout__value--time
-            workout__value--edit">
+            workout__value--edit tooltip" title="Edit field">
             ${workout.duration}</span>
           <span class="workout__unit">min</span>
         </div>
-        `;
+    `;
 
     if(workout.type === 'running')
           html += `
@@ -279,7 +277,7 @@ class App {
             <div class="workout__details">
               <span class="workout__icon">🦶🏼</span>
               <span class="workout__value workout__value--edit
-                workout__value--cadence">${workout.cadence}</span>
+                workout__value--cadence tooltip" title="Edit field">${workout.cadence}</span>
               <span class="workout__unit">spm</span>
             </div>
           </li>
@@ -296,7 +294,7 @@ class App {
             <div class="workout__details">
               <span class="workout__icon">⛰</span>
               <span class="workout__value workout__value--edit
-                workout__value--elevation">${workout.elevation}</span>
+                workout__value--elevation tooltip" title="Edit field">${workout.elevation}</span>
               <span class="workout__unit">m</span>
             </div>
           </li>
@@ -324,7 +322,7 @@ class App {
     this.#map.removeLayer(this.#popups[pos]);
     this.#popups.splice(pos, 1);
 
-    // Remove the workout from the workouts array,local storage and DOM
+    // Remove the workout from the workouts array, local storage, and DOM
     workoutEl.remove();
     this.#workouts.splice(pos, 1);
     this._refreshLocalStorage()
@@ -367,14 +365,18 @@ class App {
       class="form__edit form__edit--${checkField()}">
       `
 
-    field.insertAdjacentHTML('afterbegin', html);
-    const formEditEl = field.querySelector('.form__edit');
-    formEditEl.focus();
+    field.insertAdjacentHTML('beforebegin', html);
+    // const formEditEl = field.querySelector('.form__edit');
+    const editEl = containerWorkouts.querySelector('.form__edit');
+    editEl.value = e.target.textContent.trim()
+    editEl.focus();
+    e.target.textContent = ''
 
-    formEditEl.addEventListener('change', this._completeEdit.bind(this));
-    formEditEl.addEventListener('blur', this._cancelEdit.bind(this));
+    editEl.addEventListener('change', this._completeEdit.bind(this));
+    editEl.addEventListener('blur', this._cancelEdit.bind(this));
+
   };
-
+// Make the target workout values so theres a larger area to click
   _completeEdit(e) {
     const newVal = e.target.value;
     const targetClasses = e.target.classList
@@ -398,18 +400,19 @@ class App {
       workout.distance = +newVal;
       workoutEl.querySelector('.workout__value--distance').textContent =
       workout.distance;
-    }
+    };
+
     const updateTime = function(work) {
       workout.duration = +newVal
       workoutEl.querySelector('.workout__value--time').textContent = newVal;
-    }
+    };
 
     if (!workoutId) return;
     const workout = this.#workouts.find(work => work.id === workoutId);
 
     // Update a running workout
     if (workout.type === 'running') {
-      if (targetClasses.contains('form__edit--distance')) {
+     if (targetClasses.contains('form__edit--distance')) {
         updateDistance(workout);
       } else if (targetClasses.contains('form__edit--time')) {
         updateTime(workout);
@@ -418,30 +421,53 @@ class App {
         workoutEl.querySelector('.workout__value--cadence').textContent =
         workout.cadence;
       };
+
       calcWorkoutPace(workout);
       this._refreshLocalStorage();
-      // Update a cycling workout
+
+    // Update a cycling workout
+    } else {
+      if (targetClasses.contains('form__edit--distance')) {
+        updateDistance(workout)
+      } else if (targetClasses.contains('form__edit--time')){
+        updateTime(workout)
       } else {
-        if (targetClasses.contains('form__edit--distance')) {
-          updateDistance(workout)
-        } else if (targetClasses.contains('form__edit--time')){
-          updateTime(workout)
-        } else {
-          workout.elevation = +newVal;
-          workoutEl.querySelector('.workout__value--elevation').textContent =
-          workout.elevation;
-        };
-      calcWorkoutSpeed(workout);
-      this._refreshLocalStorage();
+        workout.elevation = +newVal;
+        workoutEl.querySelector('.workout__value--elevation').textContent =
+        workout.elevation;
       };
+    calcWorkoutSpeed(workout);
+    this._refreshLocalStorage();
+    };
+    console.log(containerWorkouts.querySelector('.form__edit'));
+    if (containerWorkouts.querySelector('.form__edit'))
+    containerWorkouts.querySelector('.form__edit').remove()
     };
 
 
   _cancelEdit(e) {
-    // Js uses blur twice because it is set in an EH, if statement catches it
+    console.log(e);
+    const editEl = containerWorkouts.querySelector('.form__edit')
+    const editValue = e.target.value
+    const originalValueEl = editEl.parentElement
+      .querySelector('.workout__value')
+
+    // Js uses blur by default twice because it is set in an Event Handler,
+    // the if statement catches it and runs the function properly
+    console.log(e);
     if (e.relatedTarget || e.target.classList.contains('form__edit')) {
-      document.querySelector('.form__edit').remove();
-      return
+      // if (e.relatedTarget || e.target.classList.contains('form__edit')) {
+
+      if (editValue !== 0) {
+        originalValueEl.textContent = editValue
+        editEl.remove();
+        return;
+      } else {
+        // Workout value was set to '' to allow edit box room.
+        // This resets the original value if edit box is exited while empty
+        originalValueEl.textContent = originalValueEl
+        editEl.remove();
+      };
     };
   };
 
