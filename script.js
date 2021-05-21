@@ -74,7 +74,6 @@ class App {
   #mapEvent;
   #mapZoomLevel = 13;
   #popups = [];
-  #workoutNameInc = 0;
 
   constructor() {
     // Get the users position
@@ -87,8 +86,11 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
-    containerWorkouts.addEventListener('click', this._editField.bind(this));
+    containerWorkouts.addEventListener('click', this._beginEdit.bind(this));
   };
+
+  _allPositive(...inputs) { inputs.every(inp => inp > 0) };
+  _validInputs(...inputs) { inputs.every(inp => Number.isFinite(inp)) };
 
   _getPosition() {
     if (navigator.geolocation)
@@ -103,7 +105,6 @@ class App {
     const { longitude } = position.coords;
     const coords = [latitude, longitude];
     this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
-    // this.#map.addEventListener('click', this._focusOnClickedWorkout);
 
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyr\
@@ -136,21 +137,18 @@ class App {
   };
 
   _toggleElevationField() {
-      inputElevation
-        .closest('.form__row')
-        .classList
-        .toggle('form__row--hidden');
-      inputCadence
-        .closest('.form__row')
-        .classList
-        .toggle('form__row--hidden');
+      inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+      inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
   };
+
+  _validateFields(inputs) {
+    // Inputs must be positive numbers or returns false
+    if (!inputs.every(inp => inp > 0) ||
+    !inputs.every(inp => Number.isFinite(inp))) return false
+  }
 
   _newWorkout(e) {
     e.preventDefault()
-    const allPositive = (...inputs) => inputs.every(inp => inp > 0);
-    const validInputs = (...inputs) => inputs.every(inp =>
-      Number.isFinite(inp));
 
     // Get data from form
     const type = inputType.value;
@@ -164,12 +162,8 @@ class App {
       const cadence = +inputCadence.value;
 
       // Check if data is valid
-      if(
-        !validInputs(distance, duration, cadence) ||
-        !allPositive(distance, duration, cadence)
-      )
-        return alert('Inputs have to be positive numbers.'
-        );
+      if( this._validateFields([distance,duration,cadence]) === false)
+        return alert('Inputs have to be positive numbers.');
 
       workout = new Running([lat, lng], distance, duration, cadence);
     };
@@ -179,13 +173,8 @@ class App {
       const elevation = +inputElevation.value;
 
       // Check if data is valid
-      if(
-        !validInputs(distance, duration, elevation) ||
-        !allPositive(distance, duration)
-      )
-        return alert(
-          'Inputs other than elevation have to be positive numbers.'
-        );
+      if( this._validateFields([distance,duration,elevation]) === false)
+        return alert('Inputs have to be positive numbers.');
 
       workout = new Cycling([lat, lng], distance, duration, elevation);
     };
@@ -224,17 +213,15 @@ class App {
   };
 
   _renderDeleteAllOption() {
-
     if(document.querySelector('.workout__delete--all')) return;
     if(document.querySelectorAll('.workout').length < 1) return;
-    console.log(form);
     const html = `
       <div class="workout__delete--all">
         <button type="button" class="btn__delete--all">
-        <span class="tooltip" title="Delete all workouts?">Remove all</span>
+        <span class="tooltip" title="Clear all workouts">Clear all</span>
         </button>
       </div>
-    `
+    `;
     containerWorkouts.insertAdjacentHTML('beforeend', html);
     document.querySelector('.btn__delete--all').addEventListener(
       'click', this._deleteAllWorkouts.bind(this));
@@ -242,7 +229,6 @@ class App {
 
   // Render workout on map as marker
   _renderWorkout(workout) {
-
     let html = `
       <li class="workout workout--${workout.type}" data-id='${workout.id}'>
         <h2 class="workout__title">${workout.description}
@@ -341,13 +327,12 @@ class App {
 
   };
 
-  _editField(e) {
+  _beginEdit(e) {
     if (e.target.classList.contains('form__edit')) return;
-
     const field = e.target.closest('.workout__value--edit');
     if (!field) return;
 
-    //Properly labels html class
+    //Properly label html class
     const checkField = function() {
       if (field.classList.contains('workout__value--time')) {
         return 'time';
@@ -363,107 +348,96 @@ class App {
     const html = `
       <input type=text maxlength=4
       class="form__edit form__edit--${checkField()}">
-      `
+    `
 
     field.insertAdjacentHTML('beforebegin', html);
-    // const formEditEl = field.querySelector('.form__edit');
     const editEl = containerWorkouts.querySelector('.form__edit');
     editEl.value = e.target.textContent.trim()
     editEl.focus();
+    editEl.originalValue = e.target.innerText
     e.target.textContent = ''
 
     editEl.addEventListener('change', this._completeEdit.bind(this));
+    editEl.addEventListener('submit', this._completeEdit.bind(this));
+    // editEl.addEventListener('change', this._cancelEdit.bind(this));
     editEl.addEventListener('blur', this._cancelEdit.bind(this));
-
   };
-// Make the target workout values so theres a larger area to click
+
   _completeEdit(e) {
-    const newVal = e.target.value;
-    const targetClasses = e.target.classList
-    const workoutEl = document.querySelector('.form__edit')
-    .closest('.workout');
+    e.preventDefault()
+    let newVal = e.target.value;
+    
+    const targetClasses = e.target.classList;
+    const workoutEl = document.querySelector('.form__edit').closest('.workout');
     const workoutId = workoutEl.getAttribute('data-id');
-
-    const calcWorkoutPace = function(work) {
-      work.pace = work.duration / work.distance;
-      workoutEl.querySelector('.workout__value--pace').textContent =
-        work.pace.toFixed(1);
-    };
-
-    const calcWorkoutSpeed = function(work) {
-      work.speed = work.distance / (work.duration / 60);
-      workoutEl.querySelector('.workout__value').textContent =
-        work.speed.toFixed(1);
-    };
-
-    const updateDistance = function(work) {
-      workout.distance = +newVal;
-      workoutEl.querySelector('.workout__value--distance').textContent =
-      workout.distance;
-    };
-
-    const updateTime = function(work) {
-      workout.duration = +newVal
-      workoutEl.querySelector('.workout__value--time').textContent = newVal;
-    };
-
+    
     if (!workoutId) return;
     const workout = this.#workouts.find(work => work.id === workoutId);
+    
+    // Check if data is valid
+    if( this._validateFields([+newVal]) === false
+    ) {
+      newVal = e.target.originalValue
+      alert('Inputs have to be positive numbers.');
+      this._cancelEdit(e)
+    };
+    // workoutEl.removeEventListener('blur', this._cancelEdit.bind(this));
+    // set originalvalue to the new value before cancel edit func runs.
+    e.target.originalValue = newVal
 
-    // Update a running workout
-    if (workout.type === 'running') {
-     if (targetClasses.contains('form__edit--distance')) {
-        updateDistance(workout);
+    if (targetClasses.contains('form__edit--distance')) {
+      workout.distance = newVal;
+      workoutEl.querySelector('.workout__value--distance').textContent = newVal;
+
       } else if (targetClasses.contains('form__edit--time')) {
-        updateTime(workout);
+
+        workout.duration = newVal;
+        workoutEl.querySelector('.workout__value--time').textContent = workout.duration;
+
+      } else if (targetClasses.contains('form__edit--elevation')) {
+        // Update a cycling elevation
+        workout.elevation = newVal;
+        workoutEl.querySelector('.workout__value--elevation').textContent =
+        workout.elevation;
+      
       } else {
-        workout.cadence = +newVal;
+        // Update a running cadence
+        workout.cadence = newVal;
         workoutEl.querySelector('.workout__value--cadence').textContent =
         workout.cadence;
       };
 
-      calcWorkoutPace(workout);
-      this._refreshLocalStorage();
+    if (workout.type === 'running') {
+      workout.pace = workout.duration / workout.distance;
+      workoutEl.querySelector('.workout__value--pace').textContent =
+        workout.pace.toFixed(1);
 
-    // Update a cycling workout
     } else {
-      if (targetClasses.contains('form__edit--distance')) {
-        updateDistance(workout)
-      } else if (targetClasses.contains('form__edit--time')){
-        updateTime(workout)
-      } else {
-        workout.elevation = +newVal;
-        workoutEl.querySelector('.workout__value--elevation').textContent =
-        workout.elevation;
-      };
-    calcWorkoutSpeed(workout);
+        workout.speed = workout.distance / (workout.duration / 60);
+        workoutEl.querySelector('.workout__value--pace').textContent =
+          workout.speed.toFixed(1);
+    };
+
     this._refreshLocalStorage();
-    };
-    console.log(containerWorkouts.querySelector('.form__edit'));
-    if (containerWorkouts.querySelector('.form__edit'))
-    containerWorkouts.querySelector('.form__edit').remove()
-    };
-
-
+    if (e.target.classList.contains('form__edit')) {
+      containerWorkouts.querySelector('.form__edit').remove()
+    }
+  };
+  
   _cancelEdit(e) {
-    console.log(e);
     const editEl = containerWorkouts.querySelector('.form__edit')
-    const editValue = e.target.value
-    const originalValueEl = editEl.parentElement
-      .querySelector('.workout__value')
+    const editValue = e.target.originalValue
+    const originalValueEl = editEl.parentElement.querySelector('.workout__value')
 
     // Js uses blur by default twice because it is set in an Event Handler,
     // the if statement catches it and runs the function properly
-    console.log(e);
     if (e.relatedTarget || e.target.classList.contains('form__edit')) {
-      // if (e.relatedTarget || e.target.classList.contains('form__edit')) {
-
       if (editValue !== 0) {
         originalValueEl.textContent = editValue
         editEl.remove();
         return;
+
       } else {
-        // Workout value was set to '' to allow edit box room.
         // This resets the original value if edit box is exited while empty
         originalValueEl.textContent = originalValueEl
         editEl.remove();
@@ -473,7 +447,6 @@ class App {
 
   _moveToPopup(e) {
     const workoutEl = e.target.closest('.workout');
-
     if(!workoutEl) return;
 
     const workout = this.#workouts.find(
@@ -494,7 +467,6 @@ class App {
 
   _getLocalStorage() {
     const data = JSON.parse(localStorage.getItem('workouts'));
-
     if (!data) return;
 
     this.#workouts = data;
