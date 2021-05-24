@@ -2,6 +2,7 @@
 
 class Workout {
   date = new Date();
+
   id = (Date.now() + '').slice(-10);
   clicks = 1;
 
@@ -10,7 +11,6 @@ class Workout {
     this.distance = distance; // in km
     this.duration = duration; // in min
   };
-
   _setDescription() {
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'];
@@ -87,6 +87,7 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     containerWorkouts.addEventListener('click', this._beginEdit.bind(this));
+    containerWorkouts.addEventListener('click', this._deleteWorkout.bind(this))
   };
 
   _allPositive(...inputs) { inputs.every(inp => inp > 0) };
@@ -304,6 +305,7 @@ class App {
       };
     });
 
+
     // Remove the popup from the map
     this.#map.removeLayer(this.#popups[pos]);
     this.#popups.splice(pos, 1);
@@ -324,7 +326,6 @@ class App {
     this.#workouts = []
     this._refreshLocalStorage()
     document.querySelector('.workout__delete--all').remove()
-
   };
 
   _beginEdit(e) {
@@ -415,7 +416,7 @@ class App {
     } else {
         workout.speed = workout.distance / (workout.duration / 60);
         workoutEl.querySelector('.workout__value--pace').textContent =
-          workout.speed.toFixed(1);
+        workout.speed.toFixed(1);
     };
 
     this._refreshLocalStorage();

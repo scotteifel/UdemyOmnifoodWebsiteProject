@@ -1,1 +1,3 @@
 change cursor to auto on hover over editable fields
+
+make editting transition smooth
